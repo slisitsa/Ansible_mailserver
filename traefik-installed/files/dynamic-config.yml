@@ -1,0 +1,28 @@
+tls:
+  options:
+    default:
+      cipherSuites:
+        - "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+      minVersion: "VersionTLS12" # Minimum TLS Version
+      sniStrict: true # Strict SNI Checking
+http:
+  middlewares:
+    # A basic authentification middleware, to protect the Traefik dashboard to anyone except myself
+    # Use with traefik.http.routers.myRouter.middlewares: "traefikAuth@file"
+    traefikBasicAuth:
+      basicAuth:
+        users:
+          - "{{ traefik.dashboard.basicAuth_user }}"
+
+  routers:
+    traefik:
+      rule: Host(`{{ traefik.dashboard.url }}`)
+      service: api@internal
+      middlewares:
+        - traefikBasicAuth
+  services:
